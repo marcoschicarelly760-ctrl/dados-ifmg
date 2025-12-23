@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Acadêmico IFMG - Consolidado</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
+    <style>
+        :root {
+            --page-bg: #1a1e23;         
+            --card-bg: #252a30;         
+            --highlight: #f07335;       
+            --text-main: #e0e0e0;       
+            --text-muted: #9ca3af;      
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --danger: #e74c3c;
+            --info: #3498db;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--page-bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 20px;
+        }
+
+        h1 { 
+            color: var(--highlight); 
+            margin: 0; 
+            text-transform: uppercase;
+            font-weight: 800;
+            font-size: 2rem;
+        }
+        
+        p { 
+            color: var(--text-muted); 
+            margin-top: 5px; 
+        }
+
+        /* CARDS KPI */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.2s;
+        }
+
+        .kpi-card:hover { transform: translateY(-5px); }
+
+        .kpi-value {
+            font-size: 2.5em;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 10px 0;
+        }
+
+        .kpi-label {
+            font-size: 0.85em;
+            color: var(--highlight);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* CONTROLES */
+        .controls {
+            background-color: var(--card-bg);
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        select {
+            padding: 12px;
+            background-color: var(--page-bg);
+            color: white;
+            border: 1px solid #444;
+            border-radius: 6px;
+            flex-grow: 1;
+            font-size: 1rem;
+        }
+
+        /* CHART GRID */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .chart-container {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            height: 400px; /* Altura fixa para consistência */
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .full-width { grid-column: 1 / -1; }
+
+        @media (max-width: 900px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Painel de Gestão Acadêmica</h1>
+        <p>Dados consolidados: Gênero, Evasão e Êxito (Base 2006-2025)</p>
+    </header>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">Total Histórico</div>
+            <div class="kpi-value" id="kpi-total" style="color: #fff">0</div>
+            <div class="kpi-label" style="color: var(--text-muted); font-size: 0.7em">Ingressantes</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Matriculados (Ativos)</div>
+            <div class="kpi-value" id="kpi-active" style="color: var(--info)">0</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Total Formados</div>
+            <div class="kpi-value" id="kpi-grads" style="color: var(--success)">0</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Total Cancelados</div>
+            <div class="kpi-value" id="kpi-dropouts" style="color: var(--danger)">0</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <label style="color: var(--highlight); font-weight: bold;">FILTRAR POR CURSO:</label>
+        <select id="courseSelect">
+            <option value="all">Visão Geral (Todos os Cursos)</option>
+        </select>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-container">
+            <canvas id="genderChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+        </div>
+
+        <div class="chart-container full-width">
+            <canvas id="courseComparisonChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    Chart.register(ChartDataLabels);
+    Chart.defaults.color = '#9ca3af';
+    Chart.defaults.font.family = "'Segoe UI', sans-serif";
+
+    // --- 1. DADOS REAIS EXTRAÍDOS (Com atualização de Física/Letras Masculino) ---
+    const db = [
+        {
+            course: "Edificações - Integrado",
+            stats: {
+                fem: { total: 192, matriculados: 53, formados: 132, cancelados: 7 },
+                masc: { total: 92, matriculados: 28, formados: 58, cancelados: 6 }
+            }
+        },
+        {
+            course: "Mecânica - Integrado",
+            stats: {
+                fem: { total: 97, matriculados: 28, formados: 66, cancelados: 3 },
+                masc: { total: 295, matriculados: 68, formados: 168, cancelados: 59 } 
+            }
+        },
+        {
+            course: "Mineração - Integrado",
+            stats: {
+                fem: { total: 192, matriculados: 45, formados: 138, cancelados: 9 },
+                masc: { total: 111, matriculados: 23, formados: 68, cancelados: 20 }
+            }
+        },
+        {
+            course: "Edificações - Subsequente",
+            stats: {
+                fem: { total: 275, matriculados: 7, formados: 194, cancelados: 74 },
+                masc: { total: 221, matriculados: 23, formados: 0, cancelados: 198 }
+            }
+        },
+        {
+            course: "Mecânica - Subsequente",
+            stats: {
+                fem: { total: 103, matriculados: 3, formados: 68, cancelados: 32 },
+                masc: { total: 415, matriculados: 36, formados: 0, cancelados: 379 }
+            }
+        },
+        {
+            course: "Mineração - Subsequente",
+            stats: {
+                fem: { total: 98, matriculados: 2, formados: 96, cancelados: 0 },
+                masc: { total: 99, matriculados: 12, formados: 0, cancelados: 87 }
+            }
+        },
+        {
+            course: "Prod. Industrial - Subsequente",
+            stats: {
+                fem: { total: 104, matriculados: 2, formados: 38, cancelados: 64 },
+                masc: { total: 31, matriculados: 0, formados: 0, cancelados: 31 }
+            }
+        },
+        {
+            course: "Edificações - Concomitante",
+            stats: {
+                fem: { total: 69, matriculados: 31, formados: 0, cancelados: 38 },
+                masc: { total: 34, matriculados: 15, formados: 15, cancelados: 4 }
+            }
+        },
+        {
+            course: "Mineração - Concomitante",
+            stats: {
+                fem: { total: 49, matriculados: 22, formados: 0, cancelados: 27 },
+                masc: { total: 35, matriculados: 13, formados: 16, cancelados: 6 }
+            }
+        },
+        {
+            course: "Informática - EJA",
+            stats: {
+                fem: { total: 25, matriculados: 0, formados: 16, cancelados: 9 },
+                masc: { total: 31, matriculados: 0, formados: 12, cancelados: 19 }
+            }
+        },
+        {
+            course: "Licenciatura em Física",
+            stats: {
+                fem: { total: 118, matriculados: 7, formados: 25, cancelados: 86 },
+                // DADOS ATUALIZADOS COM SEU ENVIO
+                masc: { total: 145, matriculados: 33, formados: 13, cancelados: 99 } 
+            }
+        },
+        {
+            course: "Licenciatura em Letras",
+            stats: {
+                fem: { total: 58, matriculados: 6, formados: 9, cancelados: 43 },
+                // DADOS ATUALIZADOS COM SEU ENVIO
+                masc: { total: 17, matriculados: 9, formados: 0, cancelados: 8 }
+            }
+        },
+        {
+            course: "Engenharia Mecânica",
+            stats: {
+                fem: { total: 37, matriculados: 6, formados: 3, cancelados: 28 },
+                masc: { total: 85, matriculados: 54, formados: 0, cancelados: 31 }
+            }
+        },
+        {
+            course: "Engenharia de Produção",
+            stats: {
+                fem: { total: 86, matriculados: 6, formados: 27, cancelados: 53 },
+                masc: { total: 93, matriculados: 55, formados: 0, cancelados: 38 }
+            }
+        }
+    ];
+
+    // --- 2. LÓGICA ---
+    
+    const select = document.getElementById('courseSelect');
+    db.forEach(c => {
+        let opt = document.createElement('option');
+        opt.value = c.course;
+        opt.innerText = c.course;
+        select.appendChild(opt);
+    });
+
+    let chartGender, chartStatus, chartComparison;
+
+    // Função para siglas
+    function getCourseLabel(courseName) {
+        let suffix = "";
+        if (courseName.includes("Integrado")) suffix = " I";
+        else if (courseName.includes("Subsequente")) suffix = " S";
+        else if (courseName.includes("Concomitante")) suffix = " C";
+        else if (courseName.includes("EJA")) suffix = " EJA";
+        
+        let baseName = courseName.split(" - ")[0];
+        
+        if (baseName.includes("Licenciatura")) baseName = baseName.replace("Licenciatura em ", "Lic. ");
+        if (baseName.includes("Engenharia")) baseName = baseName.replace("Engenharia ", "Eng. ");
+        if (baseName.includes("Prod. Industrial")) baseName = "Prod. Ind.";
+
+        return baseName + suffix;
+    }
+
+    function updateDashboard(filter) {
+        const data = filter === 'all' ? db : db.filter(d => d.course === filter);
+
+        let totalH = 0, totalM = 0;
+        let active = 0, grads = 0, drops = 0;
+        let courseLabels = [];
+        let statusData = { active: [], grads: [], drops: [] }; 
+
+        data.forEach(d => {
+            totalH += d.stats.masc.total;
+            totalM += d.stats.fem.total;
+            
+            const localActive = d.stats.fem.matriculados + d.stats.masc.matriculados;
+            const localGrads = d.stats.fem.formados + d.stats.masc.formados;
+            const localDrops = d.stats.fem.cancelados + d.stats.masc.cancelados;
+
+            active += localActive;
+            grads += localGrads;
+            drops += localDrops;
+
+            if(filter === 'all') {
+                courseLabels.push(getCourseLabel(d.course)); 
+                statusData.active.push(localActive);
+                statusData.grads.push(localGrads);
+                statusData.drops.push(localDrops);
+            }
+        });
+
+        document.getElementById('kpi-total').innerText = (totalH + totalM).toLocaleString();
+        document.getElementById('kpi-active').innerText = active.toLocaleString();
+        document.getElementById('kpi-grads').innerText = grads.toLocaleString();
+        document.getElementById('kpi-dropouts').innerText = drops.toLocaleString();
+
+        // 1. GÊNERO
+        const ctxGender = document.getElementById('genderChart').getContext('2d');
+        if(chartGender) chartGender.destroy();
+        chartGender = new Chart(ctxGender, {
+            type: 'doughnut',
+            data: {
+                labels: ['Feminino', 'Masculino'],
+                datasets: [{
+                    data: [totalM, totalH],
+                    backgroundColor: ['#e91e63', '#3498db'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: 'Distribuição por Gênero', color: '#fff' },
+                    legend: { position: 'bottom', labels: { color: '#fff' } },
+                    datalabels: {
+                        color: '#fff',
+                        font: { weight: 'bold' },
+                        formatter: (val, ctx) => {
+                            let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            return ((val*100)/sum).toFixed(1) + "%";
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. STATUS
+        const ctxStatus = document.getElementById('statusChart').getContext('2d');
+        if(chartStatus) chartStatus.destroy();
+        chartStatus = new Chart(ctxStatus, {
+            type: 'pie',
+            data: {
+                labels: ['Matriculados', 'Formados', 'Cancelados'],
+                datasets: [{
+                    data: [active, grads, drops],
+                    backgroundColor: ['#3498db', '#2ecc71', '#e74c3c'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: 'Status Acadêmico Geral', color: '#fff' },
+                    legend: { position: 'bottom', labels: { color: '#fff' } },
+                    datalabels: {
+                        color: '#fff',
+                        font: { weight: 'bold' },
+                        formatter: (val, ctx) => {
+                            let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            let perc = sum > 0 ? ((val*100)/sum).toFixed(1) + "%" : "0%";
+                            return `${perc}\n(${val})`;
+                        }
+                    }
+                }
+            }
+        });
+
+        // 3. COMPARATIVO
+        const ctxComp = document.getElementById('courseComparisonChart').getContext('2d');
+        if(chartComparison) chartComparison.destroy();
+
+        if (filter === 'all') {
+            chartComparison = new Chart(ctxComp, {
+                type: 'bar',
+                data: {
+                    labels: courseLabels,
+                    datasets: [
+                        { label: 'Formados', data: statusData.grads, backgroundColor: '#2ecc71', stack: 'Stack 0' },
+                        { label: 'Matriculados', data: statusData.active, backgroundColor: '#3498db', stack: 'Stack 0' },
+                        { label: 'Cancelados', data: statusData.drops, backgroundColor: '#e74c3c', stack: 'Stack 0' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#fff', autoSkip: false, maxRotation: 45, minRotation: 45 } },
+                        y: { ticks: { color: '#fff' }, stacked: true }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Panorama por Curso (Absoluto)', color: '#f07335', font: { size: 16 } },
+                        datalabels: { display: false } 
+                    }
+                }
+            });
+        } else {
+            const course = db.find(d => d.course === filter).stats;
+            chartComparison = new Chart(ctxComp, {
+                type: 'bar',
+                data: {
+                    labels: ['Feminino', 'Masculino'],
+                    datasets: [
+                        { label: 'Formados', data: [course.fem.formados, course.masc.formados], backgroundColor: '#2ecc71' },
+                        { label: 'Matriculados', data: [course.fem.matriculados, course.masc.matriculados], backgroundColor: '#3498db' },
+                        { label: 'Cancelados', data: [course.fem.cancelados, course.masc.cancelados], backgroundColor: '#e74c3c' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: `Detalhe por Gênero: ${filter}`, color: '#f07335', font: { size: 16 } },
+                        datalabels: { color: '#fff', anchor: 'end', align: 'top' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#fff' } },
+                        x: { ticks: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+    }
+
+    updateDashboard('all');
+
+    select.addEventListener('change', (e) => {
+        updateDashboard(e.target.value);
+    });
+
+</script>
+
+</body>
+</html>
