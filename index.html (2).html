@@ -19,6 +19,7 @@
             --warning: #f1c40f;
             --danger: #e74c3c;
             --info: #3498db;
+            --purple: #9b59b6;
         }
 
         body {
@@ -57,7 +58,7 @@
         /* CARDS KPI */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -75,7 +76,7 @@
         .kpi-card:hover { transform: translateY(-5px); }
 
         .kpi-value {
-            font-size: 2.5em;
+            font-size: 2.2em;
             font-weight: 800;
             color: var(--text-main);
             margin: 10px 0;
@@ -87,6 +88,11 @@
             text-transform: uppercase;
             font-weight: 700;
             letter-spacing: 1px;
+        }
+
+        .kpi-sub {
+            font-size: 0.75em;
+            color: var(--text-muted);
         }
 
         /* CONTROLES */
@@ -122,7 +128,7 @@
             background-color: var(--card-bg);
             padding: 20px;
             border-radius: 12px;
-            height: 400px; /* Altura fixa para consistência */
+            height: 400px;
             position: relative;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
@@ -139,26 +145,34 @@
 <div class="container">
     <header>
         <h1>Painel de Gestão Acadêmica</h1>
-        <p>Dados consolidados: Gênero, Evasão e Êxito (Base 2006-2025)</p>
+        <p>Dados consolidados: Ingressos, Egressos,e Evadidos (Base 2006-2025)</p>
     </header>
 
     <div class="kpi-grid">
         <div class="kpi-card">
             <div class="kpi-label">Total Histórico</div>
             <div class="kpi-value" id="kpi-total" style="color: #fff">0</div>
-            <div class="kpi-label" style="color: var(--text-muted); font-size: 0.7em">Ingressantes</div>
+            <div class="kpi-sub">Ingressantes</div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-label">Matriculados (Ativos)</div>
+            <div class="kpi-label">"Primeira Geração"</div>
+            <div class="kpi-value" id="kpi-first-gen" style="color: var(--purple)">0</div>
+            <div class="kpi-sub">primeira Geracao</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Matriculados</div>
             <div class="kpi-value" id="kpi-active" style="color: var(--info)">0</div>
+            <div class="kpi-sub">Matriculados</div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-label">Total Formados</div>
+            <div class="kpi-label">Formados</div>
             <div class="kpi-value" id="kpi-grads" style="color: var(--success)">0</div>
+            <div class="kpi-sub"><Em>Egressantes</Em></div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-label">Total Cancelados</div>
+            <div class="kpi-label">Cancelados</div>
             <div class="kpi-value" id="kpi-dropouts" style="color: var(--danger)">0</div>
+            <div class="kpi-sub">Evasão</div>
         </div>
     </div>
 
@@ -188,111 +202,124 @@
     Chart.defaults.color = '#9ca3af';
     Chart.defaults.font.family = "'Segoe UI', sans-serif";
 
-    // --- 1. DADOS REAIS EXTRAÍDOS (Com atualização de Física/Letras Masculino) ---
+    // --- DADOS COMPLETOS E PROCESSADOS ---
+    // 'primeira_geracao' = Total de alunos matriculados no primeiro ano registrado do curso.
     const db = [
         {
             course: "Edificações - Integrado",
             stats: {
                 fem: { total: 192, matriculados: 53, formados: 132, cancelados: 7 },
-                masc: { total: 92, matriculados: 28, formados: 58, cancelados: 6 }
+                masc: { total: 92, matriculados: 28, formados: 58, cancelados: 6 },
+                primeira_geracao: 26 // Ano 2009
             }
         },
         {
             course: "Mecânica - Integrado",
             stats: {
                 fem: { total: 97, matriculados: 28, formados: 66, cancelados: 3 },
-                masc: { total: 295, matriculados: 68, formados: 168, cancelados: 59 } 
+                masc: { total: 295, matriculados: 68, formados: 168, cancelados: 59 },
+                primeira_geracao: 38 // Ano 2009
             }
         },
         {
             course: "Mineração - Integrado",
             stats: {
                 fem: { total: 192, matriculados: 45, formados: 138, cancelados: 9 },
-                masc: { total: 111, matriculados: 23, formados: 68, cancelados: 20 }
+                masc: { total: 111, matriculados: 23, formados: 68, cancelados: 20 },
+                primeira_geracao: 34 // Ano 2009
             }
         },
         {
             course: "Edificações - Subsequente",
             stats: {
                 fem: { total: 275, matriculados: 7, formados: 194, cancelados: 74 },
-                masc: { total: 221, matriculados: 23, formados: 0, cancelados: 198 }
+                masc: { total: 221, matriculados: 23, formados: 0, cancelados: 198 },
+                primeira_geracao: 52 // Ano 2006
             }
         },
         {
             course: "Mecânica - Subsequente",
             stats: {
                 fem: { total: 103, matriculados: 3, formados: 68, cancelados: 32 },
-                masc: { total: 415, matriculados: 36, formados: 0, cancelados: 379 }
+                masc: { total: 415, matriculados: 36, formados: 0, cancelados: 379 },
+                primeira_geracao: 38 // Ano 2006
             }
         },
         {
             course: "Mineração - Subsequente",
             stats: {
                 fem: { total: 98, matriculados: 2, formados: 96, cancelados: 0 },
-                masc: { total: 99, matriculados: 12, formados: 0, cancelados: 87 }
+                masc: { total: 99, matriculados: 12, formados: 0, cancelados: 87 },
+                primeira_geracao: 10 // Ano 2014
             }
         },
         {
             course: "Prod. Industrial - Subsequente",
             stats: {
                 fem: { total: 104, matriculados: 2, formados: 38, cancelados: 64 },
-                masc: { total: 31, matriculados: 0, formados: 0, cancelados: 31 }
+                masc: { total: 31, matriculados: 0, formados: 0, cancelados: 31 },
+                primeira_geracao: 63 // Ano 2006
             }
         },
         {
             course: "Edificações - Concomitante",
             stats: {
                 fem: { total: 69, matriculados: 31, formados: 0, cancelados: 38 },
-                masc: { total: 34, matriculados: 15, formados: 15, cancelados: 4 }
+                masc: { total: 34, matriculados: 15, formados: 15, cancelados: 4 },
+                primeira_geracao: 7 // Ano 2019
             }
         },
         {
             course: "Mineração - Concomitante",
             stats: {
                 fem: { total: 49, matriculados: 22, formados: 0, cancelados: 27 },
-                masc: { total: 35, matriculados: 13, formados: 16, cancelados: 6 }
+                masc: { total: 35, matriculados: 13, formados: 16, cancelados: 6 },
+                primeira_geracao: 8 // Ano 2019
             }
         },
         {
             course: "Informática - EJA",
             stats: {
                 fem: { total: 25, matriculados: 0, formados: 16, cancelados: 9 },
-                masc: { total: 31, matriculados: 0, formados: 12, cancelados: 19 }
+                masc: { total: 31, matriculados: 0, formados: 12, cancelados: 19 },
+                primeira_geracao: 23 // Ano 2010
             }
         },
         {
             course: "Licenciatura em Física",
             stats: {
                 fem: { total: 118, matriculados: 7, formados: 25, cancelados: 86 },
-                // DADOS ATUALIZADOS COM SEU ENVIO
-                masc: { total: 145, matriculados: 33, formados: 13, cancelados: 99 } 
+                masc: { total: 145, matriculados: 33, formados: 13, cancelados: 99 },
+                primeira_geracao: 25 // Ano 2010
             }
         },
         {
             course: "Licenciatura em Letras",
             stats: {
                 fem: { total: 58, matriculados: 6, formados: 9, cancelados: 43 },
-                // DADOS ATUALIZADOS COM SEU ENVIO
-                masc: { total: 17, matriculados: 9, formados: 0, cancelados: 8 }
+                masc: { total: 17, matriculados: 9, formados: 0, cancelados: 8 },
+                primeira_geracao: 18 // Ano 2019
             }
         },
         {
             course: "Engenharia Mecânica",
             stats: {
                 fem: { total: 37, matriculados: 6, formados: 3, cancelados: 28 },
-                masc: { total: 85, matriculados: 54, formados: 0, cancelados: 31 }
+                masc: { total: 85, matriculados: 54, formados: 0, cancelados: 31 },
+                primeira_geracao: 4 // Ano 2013
             }
         },
         {
             course: "Engenharia de Produção",
             stats: {
                 fem: { total: 86, matriculados: 6, formados: 27, cancelados: 53 },
-                masc: { total: 93, matriculados: 55, formados: 0, cancelados: 38 }
+                masc: { total: 93, matriculados: 55, formados: 0, cancelados: 38 },
+                primeira_geracao: 15 // Ano 2010
             }
         }
     ];
 
-    // --- 2. LÓGICA ---
+    // --- LÓGICA DO DASHBOARD ---
     
     const select = document.getElementById('courseSelect');
     db.forEach(c => {
@@ -304,7 +331,6 @@
 
     let chartGender, chartStatus, chartComparison;
 
-    // Função para siglas
     function getCourseLabel(courseName) {
         let suffix = "";
         if (courseName.includes("Integrado")) suffix = " I";
@@ -313,11 +339,9 @@
         else if (courseName.includes("EJA")) suffix = " EJA";
         
         let baseName = courseName.split(" - ")[0];
-        
         if (baseName.includes("Licenciatura")) baseName = baseName.replace("Licenciatura em ", "Lic. ");
         if (baseName.includes("Engenharia")) baseName = baseName.replace("Engenharia ", "Eng. ");
         if (baseName.includes("Prod. Industrial")) baseName = "Prod. Ind.";
-
         return baseName + suffix;
     }
 
@@ -326,6 +350,8 @@
 
         let totalH = 0, totalM = 0;
         let active = 0, grads = 0, drops = 0;
+        let firstGen = 0; 
+        
         let courseLabels = [];
         let statusData = { active: [], grads: [], drops: [] }; 
 
@@ -340,6 +366,7 @@
             active += localActive;
             grads += localGrads;
             drops += localDrops;
+            firstGen += d.stats.primeira_geracao; 
 
             if(filter === 'all') {
                 courseLabels.push(getCourseLabel(d.course)); 
@@ -353,8 +380,9 @@
         document.getElementById('kpi-active').innerText = active.toLocaleString();
         document.getElementById('kpi-grads').innerText = grads.toLocaleString();
         document.getElementById('kpi-dropouts').innerText = drops.toLocaleString();
+        document.getElementById('kpi-first-gen').innerText = firstGen.toLocaleString();
 
-        // 1. GÊNERO
+        // 1. GRÁFICO GÊNERO
         const ctxGender = document.getElementById('genderChart').getContext('2d');
         if(chartGender) chartGender.destroy();
         chartGender = new Chart(ctxGender, {
@@ -385,7 +413,7 @@
             }
         });
 
-        // 2. STATUS
+        // 2. GRÁFICO STATUS
         const ctxStatus = document.getElementById('statusChart').getContext('2d');
         if(chartStatus) chartStatus.destroy();
         chartStatus = new Chart(ctxStatus, {
@@ -417,7 +445,7 @@
             }
         });
 
-        // 3. COMPARATIVO
+        // 3. GRÁFICO COMPARATIVO
         const ctxComp = document.getElementById('courseComparisonChart').getContext('2d');
         if(chartComparison) chartComparison.destroy();
 
