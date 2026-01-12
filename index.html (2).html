@@ -36,7 +36,7 @@
         }
 
         header {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             padding-bottom: 20px;
@@ -54,6 +54,67 @@
             color: var(--text-muted); 
             margin-top: 5px; 
         }
+
+        /* --- NOVO CSS: CARTÃO DE INTRODUÇÃO (Estilo Imagem Referência) --- */
+        .intro-card {
+            background-color: var(--card-bg);
+            padding: 25px 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border-left: 5px solid var(--highlight); /* Detalhe laranja na borda */
+        }
+
+        .intro-card h2 {
+            color: var(--highlight);
+            margin: 0 0 5px 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .intro-card h3 {
+            color: var(--text-muted);
+            margin: 0 0 20px 0;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .intro-card p {
+            color: var(--text-main);
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-size: 1rem;
+            max-width: 95%;
+        }
+
+        .course-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .tags-label {
+            font-weight: bold;
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .tag {
+            background-color: rgba(255,255,255,0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #ccc;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.3s;
+        }
+
+        .tag:hover {
+            background-color: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        /* ------------------------------------------------------------------ */
 
         /* CARDS KPI */
         .kpi-grid {
@@ -145,9 +206,30 @@
 <div class="container">
     <header>
         <h1>Painel de Gestão Acadêmica</h1>
-        <p>Dados consolidados: Ingressos, Egressos,e Evadidos (Base 2006-2025)</p>
+        <p>Dados consolidados: Ingressos, Egressos e Evadidos (Base 2006-2025)</p>
     </header>
 
+    <div class="intro-card">
+        <h2>Congonhas no IFMG</h2>
+        <h3>Campus Congonhas (Antigo CAP)</h3>
+        
+        <p>
+            Desde a consolidação do IFMG Campus Congonhas, diversos jovens iniciaram sua trajetória acadêmica na instituição. 
+            Este levantamento apresenta a participação dos estudantes nos cursos técnicos e superiores ofertados, destacando 
+            a distribuição de gêneros e o status de conclusão, o que permite observar padrões de representatividade e retenção 
+            nas diversas áreas de ensino.
+        </p>
+
+        <div class="course-tags">
+            <span class="tags-label">Áreas Analisadas:</span>
+            <span class="tag">Edificações</span>
+            <span class="tag">Mecânica</span>
+            <span class="tag">Mineração</span>
+            <span class="tag">Produção Industrial</span>
+            <span class="tag">Licenciaturas</span>
+            <span class="tag">Engenharias</span>
+        </div>
+    </div>
     <div class="kpi-grid">
         <div class="kpi-card">
             <div class="kpi-label">Total Histórico</div>
@@ -157,17 +239,17 @@
         <div class="kpi-card">
             <div class="kpi-label">"Primeira Geração"</div>
             <div class="kpi-value" id="kpi-first-gen" style="color: var(--purple)">0</div>
-            <div class="kpi-sub">primeira Geracao</div>
+            <div class="kpi-sub">Ano Base</div>
         </div>
         <div class="kpi-card">
             <div class="kpi-label">Matriculados</div>
             <div class="kpi-value" id="kpi-active" style="color: var(--info)">0</div>
-            <div class="kpi-sub">Matriculados</div>
+            <div class="kpi-sub">Cursando</div>
         </div>
         <div class="kpi-card">
             <div class="kpi-label">Formados</div>
             <div class="kpi-value" id="kpi-grads" style="color: var(--success)">0</div>
-            <div class="kpi-sub"><Em>Egressantes</Em></div>
+            <div class="kpi-sub">Egressos</div>
         </div>
         <div class="kpi-card">
             <div class="kpi-label">Cancelados</div>
@@ -203,14 +285,13 @@
     Chart.defaults.font.family = "'Segoe UI', sans-serif";
 
     // --- DADOS COMPLETOS E PROCESSADOS ---
-    // 'primeira_geracao' = Total de alunos matriculados no primeiro ano registrado do curso.
     const db = [
         {
             course: "Edificações - Integrado",
             stats: {
                 fem: { total: 192, matriculados: 53, formados: 132, cancelados: 7 },
                 masc: { total: 92, matriculados: 28, formados: 58, cancelados: 6 },
-                primeira_geracao: 26 // Ano 2009
+                primeira_geracao: 26 
             }
         },
         {
@@ -218,7 +299,7 @@
             stats: {
                 fem: { total: 97, matriculados: 28, formados: 66, cancelados: 3 },
                 masc: { total: 295, matriculados: 68, formados: 168, cancelados: 59 },
-                primeira_geracao: 38 // Ano 2009
+                primeira_geracao: 38 
             }
         },
         {
@@ -226,7 +307,7 @@
             stats: {
                 fem: { total: 192, matriculados: 45, formados: 138, cancelados: 9 },
                 masc: { total: 111, matriculados: 23, formados: 68, cancelados: 20 },
-                primeira_geracao: 34 // Ano 2009
+                primeira_geracao: 34 
             }
         },
         {
@@ -234,7 +315,7 @@
             stats: {
                 fem: { total: 275, matriculados: 7, formados: 194, cancelados: 74 },
                 masc: { total: 221, matriculados: 23, formados: 0, cancelados: 198 },
-                primeira_geracao: 52 // Ano 2006
+                primeira_geracao: 52 
             }
         },
         {
@@ -242,7 +323,7 @@
             stats: {
                 fem: { total: 103, matriculados: 3, formados: 68, cancelados: 32 },
                 masc: { total: 415, matriculados: 36, formados: 0, cancelados: 379 },
-                primeira_geracao: 38 // Ano 2006
+                primeira_geracao: 38 
             }
         },
         {
@@ -250,7 +331,7 @@
             stats: {
                 fem: { total: 98, matriculados: 2, formados: 96, cancelados: 0 },
                 masc: { total: 99, matriculados: 12, formados: 0, cancelados: 87 },
-                primeira_geracao: 10 // Ano 2014
+                primeira_geracao: 10 
             }
         },
         {
@@ -258,7 +339,7 @@
             stats: {
                 fem: { total: 104, matriculados: 2, formados: 38, cancelados: 64 },
                 masc: { total: 31, matriculados: 0, formados: 0, cancelados: 31 },
-                primeira_geracao: 63 // Ano 2006
+                primeira_geracao: 63 
             }
         },
         {
@@ -266,7 +347,7 @@
             stats: {
                 fem: { total: 69, matriculados: 31, formados: 0, cancelados: 38 },
                 masc: { total: 34, matriculados: 15, formados: 15, cancelados: 4 },
-                primeira_geracao: 7 // Ano 2019
+                primeira_geracao: 7 
             }
         },
         {
@@ -274,7 +355,7 @@
             stats: {
                 fem: { total: 49, matriculados: 22, formados: 0, cancelados: 27 },
                 masc: { total: 35, matriculados: 13, formados: 16, cancelados: 6 },
-                primeira_geracao: 8 // Ano 2019
+                primeira_geracao: 8 
             }
         },
         {
@@ -282,7 +363,7 @@
             stats: {
                 fem: { total: 25, matriculados: 0, formados: 16, cancelados: 9 },
                 masc: { total: 31, matriculados: 0, formados: 12, cancelados: 19 },
-                primeira_geracao: 23 // Ano 2010
+                primeira_geracao: 23 
             }
         },
         {
@@ -290,7 +371,7 @@
             stats: {
                 fem: { total: 118, matriculados: 7, formados: 25, cancelados: 86 },
                 masc: { total: 145, matriculados: 33, formados: 13, cancelados: 99 },
-                primeira_geracao: 25 // Ano 2010
+                primeira_geracao: 25 
             }
         },
         {
@@ -298,7 +379,7 @@
             stats: {
                 fem: { total: 58, matriculados: 6, formados: 9, cancelados: 43 },
                 masc: { total: 17, matriculados: 9, formados: 0, cancelados: 8 },
-                primeira_geracao: 18 // Ano 2019
+                primeira_geracao: 18 
             }
         },
         {
@@ -306,7 +387,7 @@
             stats: {
                 fem: { total: 37, matriculados: 6, formados: 3, cancelados: 28 },
                 masc: { total: 85, matriculados: 54, formados: 0, cancelados: 31 },
-                primeira_geracao: 4 // Ano 2013
+                primeira_geracao: 4 
             }
         },
         {
@@ -314,7 +395,7 @@
             stats: {
                 fem: { total: 86, matriculados: 6, formados: 27, cancelados: 53 },
                 masc: { total: 93, matriculados: 55, formados: 0, cancelados: 38 },
-                primeira_geracao: 15 // Ano 2010
+                primeira_geracao: 15 
             }
         }
     ];
