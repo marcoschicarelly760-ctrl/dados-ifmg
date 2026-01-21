@@ -237,7 +237,7 @@
             <div class="kpi-sub">Ingressantes</div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-label">"Primeira Geração"</div>
+            <div class="kpi-label">Primeira Geração</div>
             <div class="kpi-value" id="kpi-first-gen" style="color: var(--purple)">0</div>
             <div class="kpi-sub">Ano Base</div>
         </div>
@@ -414,9 +414,9 @@
 
     function getCourseLabel(courseName) {
         let suffix = "";
-        if (courseName.includes("Integrado")) suffix = " I";
-        else if (courseName.includes("Subsequente")) suffix = " S";
-        else if (courseName.includes("Concomitante")) suffix = " C";
+        if (courseName.includes("Integrado")) suffix = " Integrado";
+        else if (courseName.includes("Subsequente")) suffix = " Subsequente";
+        else if (courseName.includes("Concomitante")) suffix = " Concomitante";
         else if (courseName.includes("EJA")) suffix = " EJA";
         
         let baseName = courseName.split(" - ")[0];
@@ -592,3 +592,4 @@
 
 </body>
 </html>
+
