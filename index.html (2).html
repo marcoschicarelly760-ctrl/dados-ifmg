@@ -420,9 +420,9 @@
         else if (courseName.includes("EJA")) suffix = " EJA";
         
         let baseName = courseName.split(" - ")[0];
-        if (baseName.includes("Licenciatura")) baseName = baseName.replace("Licenciatura em ", "Lic. ");
-        if (baseName.includes("Engenharia")) baseName = baseName.replace("Engenharia ", "Eng. ");
-        if (baseName.includes("Prod. Industrial")) baseName = "Prod. Ind.";
+        if (baseName.includes("Licenciatura")) baseName = baseName.replace("Licenciatura em ", "Licenciatura ");
+        if (baseName.includes("Engenharia")) baseName = baseName.replace("Engenharia ", "Engenharia ");
+        if (baseName.includes("Prod. Industrial")) baseName = "Produção Industrial";
         return baseName + suffix;
     }
 
@@ -592,4 +592,5 @@
 
 </body>
 </html>
+
 
